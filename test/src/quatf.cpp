@@ -16,6 +16,7 @@ static Quatf test_mul1(PQuatf a, float s) __attribute__((noinline));
 static Quatf test_mul2(float s, PQuatf a) __attribute__((noinline));
 static Quatf test_mul3(PQuatf a, PQuatf b) __attribute__((noinline));
 static float test_dot(PQuatf a, PQuatf b) __attribute__((noinline));
+static Quatf test_normalize(PQuatf a) __attribute__((noinline));
 static Vec3f test_tfm(PQuatf q, PVec3f v) __attribute__((noinline));
 //static Mat3f test_cvtmat(PQuatf q) __attribute__((noinline));
 
@@ -92,6 +93,15 @@ TEST_CASE("quat<float>", "[quatf]") {
     REQUIRE(x == -0.5f);
   }
 
+  SECTION("normalize") {
+    Quatf a = { -1.0f, 1.0f, -1.0f, 1.0f };
+    Quatf b = test_normalize(a);
+    REQUIRE(b.w == Approx(-0.5f));
+    REQUIRE(b.x == Approx(0.5f));
+    REQUIRE(b.y == Approx(-0.5f));
+    REQUIRE(b.z == Approx(0.5f));
+  }
+
   SECTION("transform vector") {
     float c45 = 0.7071067811865476f;
     Quatf q = { c45, 0.0f, 0.0f, c45 };
@@ -157,6 +167,11 @@ static Quatf test_mul3(PQuatf a, PQuatf b)
 static float test_dot(PQuatf a, PQuatf b)
 {
   return dot(a, b);
+}
+
+static Quatf test_normalize(PQuatf a)
+{
+  return normalize(a);
 }
 
 static Vec3f test_tfm(PQuatf q, PVec3f v)

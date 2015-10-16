@@ -12,6 +12,7 @@ static Mat4f test_mul1(PMat4f a, float s) __attribute__((noinline));
 static Vec4f test_mul3(PMat4f a, PVec4f b) __attribute__((noinline));
 static Mat4f test_mul4(PMat4f a, PMat4f b) __attribute__((noinline));
 static Mat4f test_transpose(PMat4f a) __attribute__((noinline));
+static Mat4f test_inv(PMat4f a) __attribute__((noinline));
 
 TEST_CASE("mat4<float>", "[mat4f]") {
   REQUIRE(std::is_pod<Mat4f>::value);
@@ -112,6 +113,27 @@ TEST_CASE("mat4<float>", "[mat4f]") {
     REQUIRE(m2.c3.w == 16.0f);
   }
 
+  SECTION("matrix inversion") {
+    Mat4f m1 = { {2,10,0,5}, {1,-1,1,0}, {4,7,2,-1}, {5,4,3,3} };
+    Mat4f m2 = test_inv(m1);
+    REQUIRE(m2.c0.x == Approx(-34.0f / 32.0f));
+    REQUIRE(m2.c0.y == Approx(-155.0f / 32.0f));
+    REQUIRE(m2.c0.z == Approx(-5.0f / 32.0f));
+    REQUIRE(m2.c0.w == Approx(55.0f / 32.0f));
+    REQUIRE(m2.c1.x == Approx(8.0f / 32.0f));
+    REQUIRE(m2.c1.y == Approx(28.0f / 32.0f));
+    REQUIRE(m2.c1.z == Approx(4.0f / 32.0f));
+    REQUIRE(m2.c1.w == Approx(-12.0f / 32.0f));
+    REQUIRE(m2.c2.x == Approx(42.0f / 32.0f));
+    REQUIRE(m2.c2.y == Approx(215.0f / 32.0f));
+    REQUIRE(m2.c2.z == Approx(9.0f / 32.0f));
+    REQUIRE(m2.c2.w == Approx(-67.0f / 32.0f));
+    REQUIRE(m2.c3.x == Approx(4.0f / 32.0f));
+    REQUIRE(m2.c3.y == Approx(6.0f / 32.0f));
+    REQUIRE(m2.c3.z == Approx(-6.0f / 32.0f));
+    REQUIRE(m2.c3.w == Approx(2.0f / 32.0f));
+  }
+
 }
 
 static Mat4f test_add(PMat4f a, PMat4f b)
@@ -137,4 +159,9 @@ static Mat4f test_mul4(PMat4f a, PMat4f b)
 static Mat4f test_transpose(PMat4f a)
 {
   return transpose(a);
+}
+
+static Mat4f test_inv(PMat4f a)
+{
+  return inverse(a);
 }

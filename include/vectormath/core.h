@@ -23,6 +23,7 @@ struct Vec3 {
   inline Vec3() = default;
   inline Vec3(const Vec3&) = default;
   inline Vec3(const T& tx, const T& ty, const T& tz);
+  explicit inline Vec3(const Vec4<T>& v);
 };
 
 template<typename T> inline Vec3<T> operator-(const Vec3<T>& a);
@@ -32,6 +33,11 @@ template<typename T> inline Vec3<T> operator*(const Vec3<T>& a, const T& s);
 template<typename T> inline Vec3<T> operator*(const T& s, const Vec3<T>& a);
 template<typename T> inline T dot(const Vec3<T>& a, const Vec3<T>& b);
 template<typename T> inline Vec3<T> cross(const Vec3<T>& a, const Vec3<T>& b);
+template<typename T> inline Vec3<T> min(const Vec3<T>& a, const Vec3<T>& b);
+template<typename T> inline Vec3<T> max(const Vec3<T>& a, const Vec3<T>& b);
+template<typename T> inline Vec3<T> abs(const Vec3<T>& a);
+template<typename T> inline T length(const Vec3<T>& a);
+template<typename T> inline Vec3<T> normalize(const Vec3<T>& a);
 
 // 4-component vector
 template<typename T>
@@ -44,6 +50,7 @@ struct Vec4 {
   inline Vec4() = default;
   inline Vec4(const Vec4&) = default;
   inline Vec4(const T& tx, const T& ty, const T& tz, const T& tw);
+  explicit inline Vec4(const Vec3<T>& v, const T& tw);
 };
 
 template<typename T> inline Vec4<T> operator-(const Vec4<T>& a);
@@ -73,6 +80,7 @@ template<typename T> inline Mat3<T> operator*(const Mat3<T>& a, const T& s);
 template<typename T> inline Vec3<T> operator*(const Mat3<T>& m, const Vec3<T>& v);
 template<typename T> inline Mat3<T> operator*(const Mat3<T>& a, const Mat3<T>& b);
 template<typename T> inline Mat3<T> transpose(const Mat3<T>& m);
+template<typename T> inline Mat3<T> inverse(const Mat3<T>& m);
 
 // Column-major 4x4 matrix
 template<typename T>
@@ -94,6 +102,7 @@ template<typename T> inline Mat4<T> operator*(const Mat4<T>& a, const T& s);
 template<typename T> inline Vec4<T> operator*(const Mat4<T>& m, const Vec4<T>& v);
 template<typename T> inline Mat4<T> operator*(const Mat4<T>& a, const Mat4<T>& b);
 template<typename T> inline Mat4<T> transpose(const Mat4<T>& m);
+template<typename T> inline Mat4<T> inverse(const Mat4<T>& m);
 
 // Quaternion
 template<typename T>
@@ -120,6 +129,7 @@ template<typename T> inline Quat<T> operator*(const Quat<T>& a, const T& s);
 template<typename T> inline Quat<T> operator*(const T& s, const Quat<T>& a);
 template<typename T> inline Quat<T> operator*(const Quat<T>& a, const Quat<T>& b);
 template<typename T> inline T dot(const Quat<T>& a, const Quat<T>& b);
+template<typename T> inline Quat<T> normalize(const Quat<T>& a);
 template<typename T> inline Vec3<T> transform(const Quat<T>& q, const Vec3<T>& v);
 
 // Vector Operations
@@ -206,6 +216,50 @@ inline Vec3<T> cross(const Vec3<T>& a, const Vec3<T>& b)
 }
 
 template<typename T>
+inline Vec3<T> min(const Vec3<T>& a, const Vec3<T>& b)
+{
+  using std::fmin;
+  T x = fmin(a.x, b.x);
+  T y = fmin(a.y, b.y);
+  T z = fmin(a.z, b.z);
+  return Vec3<T>{ x, y, z };
+}
+
+template<typename T>
+inline Vec3<T> max(const Vec3<T>& a, const Vec3<T>& b)
+{
+  using std::fmax;
+  T x = fmax(a.x, b.x);
+  T y = fmax(a.y, b.y);
+  T z = fmax(a.z, b.z);
+  return Vec3<T>{ x, y, z };
+}
+
+template<typename T>
+inline Vec3<T> abs(const Vec3<T>& a)
+{
+  using std::fabs;
+  return Vec3<T>{ fabs(a.x), fabs(a.y), fabs(a.z) };
+}
+
+template<typename T>
+inline T length(const Vec3<T>& a)
+{
+  using std::sqrt;
+  T s = a.x * a.x + a.y * a.y + a.z * a.z;
+  return sqrt(s);
+}
+
+template<typename T>
+inline Vec3<T> normalize(const Vec3<T>& a)
+{
+  using std::sqrt;
+  T s = a.x * a.x + a.y * a.y + a.z * a.z;
+  s = T(1) / sqrt(s);
+  return Vec3<T>{ (a.x * s), (a.y * s), (a.z * s) };
+}
+
+template<typename T>
 inline Vec3<T>::Vec3(const T& tx, const T& ty, const T& tz)
 : x(tx), y(ty), z(tz)
 {
@@ -214,6 +268,18 @@ inline Vec3<T>::Vec3(const T& tx, const T& ty, const T& tz)
 template<typename T>
 inline Vec4<T>::Vec4(const T& tx, const T& ty, const T& tz, const T& tw)
 : x(tx), y(ty), z(tz), w(tw)
+{
+}
+
+template<typename T>
+inline Vec3<T>::Vec3(const Vec4<T>& v)
+: x(v.x), y(v.y), z(v.z)
+{
+}
+
+template<typename T>
+inline Vec4<T>::Vec4(const Vec3<T>& v, const T& tw)
+: x(v.x), y(v.y), z(v.z), w(tw)
 {
 }
 
@@ -286,6 +352,61 @@ inline Mat4<T> transpose(const Mat4<T>& m)
     Vec4<T>{ m.c0.z, m.c1.z, m.c2.z, m.c3.z },
     Vec4<T>{ m.c0.w, m.c1.w, m.c2.w, m.c3.w }
   };
+}
+
+template<typename T>
+inline Mat3<T> inverse(const Mat3<T>& m)
+{
+  Vec3<T> tmp0, tmp1, tmp2;
+  tmp0 = cross(m.c1, m.c2);
+  tmp1 = cross(m.c2, m.c0);
+  tmp2 = cross(m.c0, m.c1);
+  T detinv = T(1) / dot(m.c2, tmp2);
+  return Mat3<T>{
+    Vec3<T>{ (tmp0.x * detinv), (tmp1.x * detinv), (tmp2.x * detinv) },
+    Vec3<T>{ (tmp0.y * detinv), (tmp1.y * detinv), (tmp2.y * detinv) },
+    Vec3<T>{ (tmp0.z * detinv), (tmp1.z * detinv), (tmp2.z * detinv) }
+  };
+}
+
+template<typename T>
+inline Mat4<T> inverse(const Mat4<T>& m)
+{
+  Vec4<T> r0, r1, r2, r3;
+  T tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, detinv;
+  tmp0 = m.c2.z * m.c0.w - m.c0.z * m.c2.w;
+  tmp1 = m.c3.z * m.c1.w - m.c1.z * m.c3.w;
+  tmp2 = m.c0.y * m.c2.z - m.c2.y * m.c0.z;
+  tmp3 = m.c1.y * m.c3.z - m.c3.y * m.c1.z;
+  tmp4 = m.c2.y * m.c0.w - m.c0.y * m.c2.w;
+  tmp5 = m.c3.y * m.c1.w - m.c1.y * m.c3.w;
+  r0 = { m.c2.y * tmp1 - m.c2.w * tmp3 - m.c2.z * tmp5,
+         m.c3.y * tmp0 - m.c3.w * tmp2 - m.c3.z * tmp4,
+         m.c0.w * tmp3 + m.c0.z * tmp5 - m.c0.y * tmp1,
+         m.c1.w * tmp2 + m.c1.z * tmp4 - m.c1.y * tmp0 };
+  r1 = { m.c2.x * tmp1, m.c3.x * tmp0, m.c0.x * tmp1, m.c1.x * tmp0 };
+  r3 = { m.c2.x * tmp3, m.c3.x * tmp2, m.c0.x * tmp3, m.c1.x * tmp2 };
+  r2 = { m.c2.x * tmp5, m.c3.x * tmp4, m.c0.x * tmp5, m.c1.x * tmp4 };
+  detinv = 1.0f / dot(r0, {m.c0.x, m.c1.x, m.c2.x, m.c3.x});
+  tmp0 = m.c2.x * m.c0.y - m.c0.x * m.c2.y;
+  tmp1 = m.c3.x * m.c1.y - m.c1.x * m.c3.y;
+  tmp2 = m.c2.x * m.c0.w - m.c0.x * m.c2.w;
+  tmp3 = m.c3.x * m.c1.w - m.c1.x * m.c3.w;
+  tmp4 = m.c2.x * m.c0.z - m.c0.x * m.c2.z;
+  tmp5 = m.c3.x * m.c1.z - m.c1.x * m.c3.z;
+  r2 = { m.c2.w * tmp1 - m.c2.y * tmp3 + r2.x,
+         m.c3.w * tmp0 - m.c3.y * tmp2 + r2.y,
+         m.c0.y * tmp3 - m.c0.w * tmp1 - r2.z,
+         m.c1.y * tmp2 - m.c1.w * tmp0 - r2.w };
+  r3 = { m.c2.y * tmp5 - m.c2.z * tmp1 + r3.x,
+         m.c3.y * tmp4 - m.c3.z * tmp0 + r3.y,
+         m.c0.z * tmp1 - m.c0.y * tmp5 - r3.z,
+         m.c1.z * tmp0 - m.c1.y * tmp4 - r3.w };
+  r1 = { m.c2.z * tmp3 - m.c2.w * tmp5 - r1.x,
+         m.c3.z * tmp2 - m.c3.w * tmp4 - r1.y,
+         m.c0.w * tmp5 - m.c0.z * tmp3 + r1.z,
+         m.c1.w * tmp4 - m.c1.z * tmp2 + r1.w };
+  return Mat4<T>{ r0 * detinv, r1 * detinv, r2 * detinv, r3 * detinv };
 }
 
 template<typename T>
@@ -376,6 +497,15 @@ template<typename T>
 inline T dot(const Quat<T>& a, const Quat<T>& b)
 {
   return a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+template<typename T>
+inline Quat<T> normalize(const Quat<T>& a)
+{
+  using std::sqrt;
+  T s = a.w * a.w + a.x * a.x + a.y * a.y + a.z * a.z;
+  s = T(1) / sqrt(s);
+  return Quat<T>{ (a.w * s), (a.x * s), (a.y * s), (a.z * s) };
 }
 
 template<typename T>
