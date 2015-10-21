@@ -14,6 +14,9 @@ static Pos3f test_sub1(PPos3f a, PVec3f b) __attribute__((noinline));
 static Vec3f test_sub2(PPos3f a, PPos3f b) __attribute__((noinline));
 static Pos3f test_mul1(PPos3f a, float s) __attribute__((noinline));
 static Pos3f test_mul2(float s, PPos3f a) __attribute__((noinline));
+static Pos3f test_min(PPos3f a, PPos3f b) __attribute__((noinline));
+static Pos3f test_max(PPos3f a, PPos3f b) __attribute__((noinline));
+static Pos3f test_abs(PPos3f a) __attribute__((noinline));
 
 TEST_CASE("pos3<float>", "[pos3f]") {
   REQUIRE(std::is_pod<Pos3f>::value);
@@ -83,6 +86,27 @@ TEST_CASE("pos3<float>", "[pos3f]") {
     REQUIRE(c.y == -1.0f);
     REQUIRE(c.z == 1.75f);
   }
+
+  SECTION("min/max per element") {
+    Pos3f a = { 1.0f, 2.0f, 3.0f };
+    Pos3f b = { 0.5f, 4.0f, -1.0f };
+    Pos3f c = test_min(a, b);
+    Pos3f d = test_max(a, b);
+    REQUIRE(c.x == 0.5f);
+    REQUIRE(c.y == 2.0f);
+    REQUIRE(c.z == -1.0f);
+    REQUIRE(d.x == 1.0f);
+    REQUIRE(d.y == 4.0f);
+    REQUIRE(d.z == 3.0f);
+  }
+
+  SECTION("abs") {
+    Pos3f a = { 0.5f, 0.0f, -1.0f };
+    Pos3f b = test_abs(a);
+    REQUIRE(b.x == 0.5f);
+    REQUIRE(b.y == 0.0f);
+    REQUIRE(b.z == 1.0f);
+  }
 }
 
 static Pos3f test_neg(PPos3f a)
@@ -113,4 +137,19 @@ static Pos3f test_mul1(PPos3f a, float s)
 static Pos3f test_mul2(float s, PPos3f a)
 {
   return s * a;
+}
+
+static Pos3f test_min(PPos3f a, PPos3f b)
+{
+  return min(a, b);
+}
+
+static Pos3f test_max(PPos3f a, PPos3f b)
+{
+  return max(a, b);
+}
+
+static Pos3f test_abs(PPos3f a)
+{
+  return abs(a);
 }

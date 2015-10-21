@@ -15,11 +15,23 @@ struct Vec3<simdf4> {
   simdf4 y;
   simdf4 z;
 
-  // static inline Vec3 splat(const Vec3<float>& v);
+  static inline Vec3 splat(const Vec3<float>& v);
   static inline Vec3 load(const float* addr);
 };
 
 inline void store(float* addr, const Vec3<simdf4>& v);
+
+template<>
+struct Pos3<simdf4> {
+  simdf4 x;
+  simdf4 y;
+  simdf4 z;
+
+  static inline Pos3 splat(const Pos3<float>& v);
+  static inline Pos3 load(const float* addr);
+};
+
+inline void store(float* addr, const Pos3<simdf4>& v);
 
 template<>
 struct Vec4<simdf4> {
@@ -28,7 +40,7 @@ struct Vec4<simdf4> {
   simdf4 z;
   simdf4 w;
 
-  // static inline Vec4 splat(const Vec4<float>& v);
+  static inline Vec4 splat(const Vec4<float>& v);
   static inline Vec4 load(const float* addr);
 };
 
@@ -41,11 +53,40 @@ struct Quat<simdf4> {
   simdf4 y;
   simdf4 z;
 
-  // static inline Quat splat(const Quat<float>& v);
+  static inline Quat splat(const Quat<float>& v);
   static inline Quat load(const float* addr);
 };
 
 inline void store(float* addr, const Quat<simdf4>& q);
+
+template<>
+struct Mat3<simdf4> {
+  Vec3<simdf4> c0;
+  Vec3<simdf4> c1;
+  Vec3<simdf4> c2;
+
+  static inline Mat3 splat(const Mat3<float>& m);
+};
+
+template<>
+struct Mat4<simdf4> {
+  Vec4<simdf4> c0;
+  Vec4<simdf4> c1;
+  Vec4<simdf4> c2;
+  Vec4<simdf4> c3;
+
+  static inline Mat4 splat(const Mat4<float>& m);
+};
+
+template<>
+struct Tfm3<simdf4> {
+  Vec3<simdf4> c0;
+  Vec3<simdf4> c1;
+  Vec3<simdf4> c2;
+  Vec3<simdf4> c3;
+
+  static inline Tfm3 splat(const Tfm3<float>& m);
+};
 
 // Utility functions
 
@@ -71,6 +112,75 @@ inline void _transpose(simdf4& a0, simdf4& a1, simdf4& a2, simdf4& a3)
   a3 = _unpackhi(tmp2, tmp3);
 }
 
+// Splat
+
+inline Vec3<simdf4> Vec3<simdf4>::splat(const Vec3<float>& v)
+{
+  return Vec3<simdf4>{
+    (simdf4){ v.x, v.x, v.x, v.x },
+    (simdf4){ v.y, v.y, v.y, v.y },
+    (simdf4){ v.z, v.z, v.z, v.z }
+  };
+}
+
+inline Pos3<simdf4> Pos3<simdf4>::splat(const Pos3<float>& v)
+{
+  return Pos3<simdf4>{
+    (simdf4){ v.x, v.x, v.x, v.x },
+    (simdf4){ v.y, v.y, v.y, v.y },
+    (simdf4){ v.z, v.z, v.z, v.z }
+  };
+}
+
+inline Vec4<simdf4> Vec4<simdf4>::splat(const Vec4<float>& v)
+{
+  return Vec4<simdf4>{
+    (simdf4){ v.x, v.x, v.x, v.x },
+    (simdf4){ v.y, v.y, v.y, v.y },
+    (simdf4){ v.z, v.z, v.z, v.z },
+    (simdf4){ v.w, v.w, v.w, v.w }
+  };
+}
+
+inline Quat<simdf4> Quat<simdf4>::splat(const Quat<float>& v)
+{
+  return Quat<simdf4>{
+    (simdf4){ v.x, v.x, v.x, v.x },
+    (simdf4){ v.y, v.y, v.y, v.y },
+    (simdf4){ v.z, v.z, v.z, v.z },
+    (simdf4){ v.w, v.w, v.w, v.w }
+  };
+}
+
+inline Mat3<simdf4> Mat3<simdf4>::splat(const Mat3<float>& m)
+{
+  return Mat3<simdf4>{
+    Vec3<simdf4>::splat(m.c0),
+    Vec3<simdf4>::splat(m.c1),
+    Vec3<simdf4>::splat(m.c2)
+  };
+}
+
+inline Mat4<simdf4> Mat4<simdf4>::splat(const Mat4<float>& m)
+{
+  return Mat4<simdf4>{
+    Vec4<simdf4>::splat(m.c0),
+    Vec4<simdf4>::splat(m.c1),
+    Vec4<simdf4>::splat(m.c2),
+    Vec4<simdf4>::splat(m.c3)
+  };
+}
+
+inline Tfm3<simdf4> Tfm3<simdf4>::splat(const Tfm3<float>& m)
+{
+  return Tfm3<simdf4>{
+    Vec3<simdf4>::splat(m.c0),
+    Vec3<simdf4>::splat(m.c1),
+    Vec3<simdf4>::splat(m.c2),
+    Vec3<simdf4>::splat(m.c3)
+  };
+}
+
 // Load
 
 inline Vec3<simdf4> Vec3<simdf4>::load(const float* addr)
@@ -86,6 +196,12 @@ inline Vec3<simdf4> Vec3<simdf4>::load(const float* addr)
   return Vec3<simdf4>{ xxxx, yyyy, zzzz };
 }
 
+inline Pos3<simdf4> Pos3<simdf4>::load(const float* addr)
+{
+  Vec3<simdf4> v = Vec3<simdf4>::load(addr);
+  return Pos3<simdf4>{ v.x, v.y, v.z };
+}
+
 inline Vec4<simdf4> Vec4<simdf4>::load(const float* addr)
 {
   simdf4 a0 = *(const simdf4*)(addr);
@@ -98,12 +214,8 @@ inline Vec4<simdf4> Vec4<simdf4>::load(const float* addr)
 
 inline Quat<simdf4> Quat<simdf4>::load(const float* addr)
 {
-  simdf4 a0 = *(const simdf4*)(addr);
-  simdf4 a1 = *(const simdf4*)(addr+4);
-  simdf4 a2 = *(const simdf4*)(addr+8);
-  simdf4 a3 = *(const simdf4*)(addr+12);
-  _transpose(a0, a1, a2, a3);
-  return Quat<simdf4>{ a0, a1, a2, a3 };
+  Vec4<simdf4> v = Vec4<simdf4>::load(addr);
+  return Quat<simdf4>{ v.x, v.y, v.z, v.w };
 }
 
 // Store
@@ -122,6 +234,11 @@ inline void store(float* addr, const Vec3<simdf4>& v)
   *(simdf4*)(addr+8) = z2x3y3z3;
 }
 
+inline void store(float* addr, const Pos3<simdf4>& p)
+{
+  store(addr, Vec3<simdf4>{ p.x, p.y, p.z });
+}
+
 inline void store(float* addr, const Vec4<simdf4>& v)
 {
   simdf4 a0 = v.x, a1 = v.y, a2 = v.z, a3 = v.w;
@@ -134,12 +251,7 @@ inline void store(float* addr, const Vec4<simdf4>& v)
 
 inline void store(float* addr, const Quat<simdf4>& q)
 {
-  simdf4 a0 = q.w, a1 = q.x, a2 = q.y, a3 = q.z;
-  _transpose(a0, a1, a2, a3);
-  *(simdf4*)(addr) = a0;
-  *(simdf4*)(addr+4) = a1;
-  *(simdf4*)(addr+8) = a2;
-  *(simdf4*)(addr+12) = a3;
+  store(addr, Vec4<simdf4>{ q.w, q.x, q.y, q.z });
 }
 
 }
