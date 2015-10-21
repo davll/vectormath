@@ -8,6 +8,7 @@
 namespace vectormath {
 
 template<typename T> struct Vec3;
+template<typename T> struct Pos3;
 template<typename T> struct Vec4;
 template<typename T> struct Mat3;
 template<typename T> struct Mat4;
@@ -24,6 +25,7 @@ struct Vec3 {
   inline Vec3(const Vec3&) = default;
   inline Vec3(const T& tx, const T& ty, const T& tz);
   explicit inline Vec3(const Vec4<T>& v);
+  explicit inline Vec3(const Pos3<T>& p);
 };
 
 template<typename T> inline Vec3<T> operator-(const Vec3<T>& a);
@@ -39,6 +41,27 @@ template<typename T> inline Vec3<T> abs(const Vec3<T>& a);
 template<typename T> inline T length(const Vec3<T>& a);
 template<typename T> inline Vec3<T> normalize(const Vec3<T>& a);
 
+// 3-D position vector
+template<typename T>
+struct Pos3 {
+  T x;
+  T y;
+  T z;
+
+  inline Pos3() = default;
+  inline Pos3(const Pos3&) = default;
+  inline Pos3(const T& tx, const T& ty, const T& tz);
+  explicit inline Pos3(const Vec3<T>& v);
+  explicit inline Pos3(const Vec4<T>& v);
+};
+
+template<typename T> inline Pos3<T> operator-(const Pos3<T>& a);
+template<typename T> inline Pos3<T> operator+(const Pos3<T>& a, const Vec3<T>& b);
+template<typename T> inline Vec3<T> operator-(const Pos3<T>& a, const Pos3<T>& b);
+template<typename T> inline Pos3<T> operator-(const Pos3<T>& a, const Vec3<T>& b);
+template<typename T> inline Pos3<T> operator*(const Pos3<T>& a, const T& s);
+template<typename T> inline Pos3<T> operator*(const T& s, const Pos3<T>& a);
+
 // 4-component vector
 template<typename T>
 struct Vec4 {
@@ -50,7 +73,8 @@ struct Vec4 {
   inline Vec4() = default;
   inline Vec4(const Vec4&) = default;
   inline Vec4(const T& tx, const T& ty, const T& tz, const T& tw);
-  explicit inline Vec4(const Vec3<T>& v, const T& tw);
+  explicit inline Vec4(const Vec3<T>& v, const T& tw = T(0));
+  explicit inline Vec4(const Pos3<T>& p);
 };
 
 template<typename T> inline Vec4<T> operator-(const Vec4<T>& a);
@@ -72,7 +96,9 @@ struct Mat3 {
   inline Mat3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c);
 
   static inline Mat3 identity();
+  static inline Mat3 rotation(const T& angle, const Vec3<T>& axis);
   static inline Mat3 rotation(const Quat<T>& unitquat);
+  static inline Mat3 scale(const Vec3<T>& scalevec);
 };
 
 template<typename T> inline Mat3<T> operator+(const Mat3<T>& a, const Mat3<T>& b);
@@ -93,16 +119,41 @@ struct Mat4 {
   inline Mat4() = default;
   inline Mat4(const Mat4&) = default;
   inline Mat4(const Vec4<T>& a, const Vec4<T>& b, const Vec4<T>& c, const Vec4<T>& d);
+  explicit inline Mat4(const Mat3<T>& m, const Vec4<T>& v);
 
   static inline Mat4 identity();
 };
 
 template<typename T> inline Mat4<T> operator+(const Mat4<T>& a, const Mat4<T>& b);
 template<typename T> inline Mat4<T> operator*(const Mat4<T>& a, const T& s);
+template<typename T> inline Vec4<T> operator*(const Mat4<T>& m, const Vec3<T>& v);
+template<typename T> inline Vec4<T> operator*(const Mat4<T>& m, const Pos3<T>& p);
 template<typename T> inline Vec4<T> operator*(const Mat4<T>& m, const Vec4<T>& v);
 template<typename T> inline Mat4<T> operator*(const Mat4<T>& a, const Mat4<T>& b);
 template<typename T> inline Mat4<T> transpose(const Mat4<T>& m);
 template<typename T> inline Mat4<T> inverse(const Mat4<T>& m);
+template<typename T> inline Mat3<T> upper3x3(const Mat4<T>& m);
+
+// Column-major 4x3 matrix
+template<typename T>
+struct Tfm3 {
+  Vec3<T> c0;
+  Vec3<T> c1;
+  Vec3<T> c2;
+  Vec3<T> c3;
+
+  inline Tfm3() = default;
+  inline Tfm3(const Tfm3&) = default;
+  inline Tfm3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c, const Vec3<T>& d);
+  explicit inline Tfm3(const Mat3<T>& m, const Vec3<T>& v);
+
+  static inline Tfm3 identity();
+};
+
+template<typename T> inline Vec3<T> operator*(const Tfm3<T>& m, const Vec3<T>& v);
+template<typename T> inline Pos3<T> operator*(const Tfm3<T>& m, const Pos3<T>& p);
+template<typename T> inline Tfm3<T> operator*(const Tfm3<T>& a, const Tfm3<T>& b);
+template<typename T> inline Tfm3<T> inverse(const Tfm3<T>& m);
 
 // Quaternion
 template<typename T>
@@ -141,6 +192,12 @@ inline Vec3<T> operator-(const Vec3<T>& a)
 }
 
 template<typename T>
+inline Pos3<T> operator-(const Pos3<T>& a)
+{
+  return Pos3<T>{ -a.x, -a.y, -a.z };
+}
+
+template<typename T>
 inline Vec4<T> operator-(const Vec4<T>& a)
 {
   return Vec4<T>{ -a.x, -a.y, -a.z, -a.w };
@@ -153,6 +210,12 @@ inline Vec3<T> operator+(const Vec3<T>& a, const Vec3<T>& b)
 }
 
 template<typename T>
+inline Pos3<T> operator+(const Pos3<T>& a, const Vec3<T>& b)
+{
+  return Pos3<T>{ a.x + b.x, a.y + b.y, a.z + b.z };
+}
+
+template<typename T>
 inline Vec4<T> operator+(const Vec4<T>& a, const Vec4<T>& b)
 {
   return Vec4<T>{ a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w };
@@ -160,6 +223,18 @@ inline Vec4<T> operator+(const Vec4<T>& a, const Vec4<T>& b)
 
 template<typename T>
 inline Vec3<T> operator-(const Vec3<T>& a, const Vec3<T>& b)
+{
+  return Vec3<T>{ a.x - b.x, a.y - b.y, a.z - b.z };
+}
+
+template<typename T>
+inline Pos3<T> operator-(const Pos3<T>& a, const Vec3<T>& b)
+{
+  return Pos3<T>{ a.x - b.x, a.y - b.y, a.z - b.z };
+}
+
+template<typename T>
+inline Vec3<T> operator-(const Pos3<T>& a, const Pos3<T>& b)
 {
   return Vec3<T>{ a.x - b.x, a.y - b.y, a.z - b.z };
 }
@@ -177,6 +252,12 @@ inline Vec3<T> operator*(const Vec3<T>& a, const T& s)
 }
 
 template<typename T>
+inline Pos3<T> operator*(const Pos3<T>& a, const T& s)
+{
+  return Pos3<T>{ a.x * s, a.y * s, a.z * s };
+}
+
+template<typename T>
 inline Vec4<T> operator*(const Vec4<T>& a, const T& s)
 {
   return Vec4<T>{ a.x * s, a.y * s, a.z * s, a.w * s };
@@ -186,6 +267,12 @@ template<typename T>
 inline Vec3<T> operator*(const T& s, const Vec3<T>& a)
 {
   return Vec3<T>{ s * a.x, s * a.y, s * a.z };
+}
+
+template<typename T>
+inline Pos3<T> operator*(const T& s, const Pos3<T>& a)
+{
+  return Pos3<T>{ s * a.x, s * a.y, s * a.z };
 }
 
 template<typename T>
@@ -266,8 +353,20 @@ inline Vec3<T>::Vec3(const T& tx, const T& ty, const T& tz)
 }
 
 template<typename T>
+inline Pos3<T>::Pos3(const T& tx, const T& ty, const T& tz)
+: x(tx), y(ty), z(tz)
+{
+}
+
+template<typename T>
 inline Vec4<T>::Vec4(const T& tx, const T& ty, const T& tz, const T& tw)
 : x(tx), y(ty), z(tz), w(tw)
+{
+}
+
+template<typename T>
+inline Vec3<T>::Vec3(const Pos3<T>& p)
+: x(p.x), y(p.y), z(p.z)
 {
 }
 
@@ -280,6 +379,24 @@ inline Vec3<T>::Vec3(const Vec4<T>& v)
 template<typename T>
 inline Vec4<T>::Vec4(const Vec3<T>& v, const T& tw)
 : x(v.x), y(v.y), z(v.z), w(tw)
+{
+}
+
+template<typename T>
+inline Pos3<T>::Pos3(const Vec3<T>& v)
+: x(v.x), y(v.y), z(v.z)
+{
+}
+
+template<typename T>
+inline Pos3<T>::Pos3(const Vec4<T>& v)
+: x(v.x / v.w), y(v.y / v.w), z(v.z / v.w)
+{
+}
+
+template<typename T>
+inline Vec4<T>::Vec4(const Pos3<T>& p)
+: x(p.x), y(p.y), z(p.z), w(T(1))
 {
 }
 
@@ -316,9 +433,33 @@ inline Vec3<T> operator*(const Mat3<T>& m, const Vec3<T>& v)
 }
 
 template<typename T>
+inline Vec4<T> operator*(const Mat4<T>& m, const Vec3<T>& v)
+{
+  return m.c0 * v.x + m.c1 * v.y + m.c2 * v.z;
+}
+
+template<typename T>
+inline Vec4<T> operator*(const Mat4<T>& m, const Pos3<T>& p)
+{
+  return m.c0 * p.x + m.c1 * p.y + m.c2 * p.z + m.c3;
+}
+
+template<typename T>
 inline Vec4<T> operator*(const Mat4<T>& m, const Vec4<T>& v)
 {
   return m.c0 * v.x + m.c1 * v.y + m.c2 * v.z + m.c3 * v.w;
+}
+
+template<typename T>
+inline Vec3<T> operator*(const Tfm3<T>& m, const Vec3<T>& v)
+{
+  return m.c0 * v.x + m.c1 * v.y + m.c2 * v.z;
+}
+
+template<typename T>
+inline Pos3<T> operator*(const Tfm3<T>& m, const Pos3<T>& p)
+{
+  return Pos3<T>(m.c0 * p.x + m.c1 * p.y + m.c2 * p.z + m.c3);
 }
 
 template<typename T>
@@ -331,6 +472,12 @@ template<typename T>
 inline Mat4<T> operator*(const Mat4<T>& a, const Mat4<T>& b)
 {
   return Mat4<T>{ a * b.c0, a * b.c1, a * b.c2, a * b.c3 };
+}
+
+template<typename T>
+inline Tfm3<T> operator*(const Tfm3<T>& a, const Tfm3<T>& b)
+{
+  return Tfm3<T>{ a * b.c0, a * b.c1, a * b.c2, a * b.c3 + a.c3 };
 }
 
 template<typename T>
@@ -410,6 +557,19 @@ inline Mat4<T> inverse(const Mat4<T>& m)
 }
 
 template<typename T>
+inline Tfm3<T> inverse(const Tfm3<T>& m)
+{
+  Mat3<T> r = inverse(Mat3<T>{ m.c0, m.c1, m.c2 });
+  return Tfm3<T>{ r, -(r * m.c3) };
+}
+
+template<typename T>
+inline Mat3<T> upper3x3(const Mat4<T>& m)
+{
+  return Mat3<T>{ Vec3<T>{m.c0}, Vec3<T>{m.c1}, Vec3<T>{m.c2} };
+}
+
+template<typename T>
 inline Mat3<T>::Mat3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
 : c0(a), c1(b), c2(c)
 {
@@ -418,6 +578,24 @@ inline Mat3<T>::Mat3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
 template<typename T>
 inline Mat4<T>::Mat4(const Vec4<T>& a, const Vec4<T>& b, const Vec4<T>& c, const Vec4<T>& d)
 : c0(a), c1(b), c2(c), c3(d)
+{
+}
+
+template<typename T>
+inline Tfm3<T>::Tfm3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c, const Vec3<T>& d)
+: c0(a), c1(b), c2(c), c3(d)
+{
+}
+
+template<typename T>
+inline Mat4<T>::Mat4(const Mat3<T>& m, const Vec4<T>& v)
+: c0(m.c0, T(0)), c1(m.c1, T(0)), c2(m.c2, T(0)), c3(v)
+{
+}
+
+template<typename T>
+inline Tfm3<T>::Tfm3(const Mat3<T>& m, const Vec3<T>& v)
+: c0(m.c0), c1(m.c1), c2(m.c2), c3(v)
 {
 }
 
@@ -439,6 +617,44 @@ inline Mat4<T> Mat4<T>::identity()
     Vec4<T>{ T(0), T(1), T(0), T(0) },
     Vec4<T>{ T(0), T(0), T(1), T(0) },
     Vec4<T>{ T(0), T(0), T(0), T(1) }
+  };
+}
+
+template<typename T>
+inline Tfm3<T> Tfm3<T>::identity()
+{
+  return Tfm3<T>{
+    Vec3<T>{ T(1), T(0), T(0) },
+    Vec3<T>{ T(0), T(1), T(0) },
+    Vec3<T>{ T(0), T(0), T(1) },
+    Vec3<T>{ T(0), T(0), T(0) }
+  };
+}
+
+template<typename T>
+inline Mat3<T> Mat3<T>::rotation(const T& angle, const Vec3<T>& axis)
+{
+  using std::sin;
+  using std::cos;
+  T s = sin(angle);
+  T c = cos(angle);
+  T x = axis.x, y = axis.y, z = axis.z;
+  T xx = x * x, yy = y * y, zz = z * z, xy = x * y, yz = y * z, zx = z * x;
+  T omc = T(1) - c;
+  return Mat3<T>{
+    Vec3<T>{ xx * omc + c, xy * omc + z*s, zx * omc - y*s },
+    Vec3<T>{ xy * omc - z*s, yy * omc + c, yz * omc + x*s },
+    Vec3<T>{ zx * omc + y*s, yz * omc - x*s, zz * omc + c }
+  };
+}
+
+template<typename T>
+inline Mat3<T> Mat3<T>::scale(const Vec3<T>& scalevec)
+{
+  return Mat3<T>{
+    Vec3<T>{ scalevec.x, T(0), T(0) },
+    Vec3<T>{ T(0), scalevec.y, T(0) },
+    Vec3<T>{ T(0), T(0), scalevec.z }
   };
 }
 

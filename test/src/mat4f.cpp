@@ -2,6 +2,10 @@
 #include <type_traits>
 #include "catch.hpp"
 
+using Vec3f = vectormath::Vec3<float>;
+using PVec3f = const vectormath::Vec3<float>&;
+using Pos3f = vectormath::Pos3<float>;
+using PPos3f = const vectormath::Pos3<float>&;
 using Vec4f = vectormath::Vec4<float>;
 using PVec4f = const vectormath::Vec4<float>&;
 using Mat4f = vectormath::Mat4<float>;
@@ -11,6 +15,8 @@ static Mat4f test_add(PMat4f a, PMat4f b) __attribute__((noinline));
 static Mat4f test_mul1(PMat4f a, float s) __attribute__((noinline));
 static Vec4f test_mul3(PMat4f a, PVec4f b) __attribute__((noinline));
 static Mat4f test_mul4(PMat4f a, PMat4f b) __attribute__((noinline));
+static Vec4f test_mul5(PMat4f a, PVec3f b) __attribute__((noinline));
+static Vec4f test_mul6(PMat4f a, PPos3f b) __attribute__((noinline));
 static Mat4f test_transpose(PMat4f a) __attribute__((noinline));
 static Mat4f test_inv(PMat4f a) __attribute__((noinline));
 
@@ -60,7 +66,7 @@ TEST_CASE("mat4<float>", "[mat4f]") {
     REQUIRE(m2.c3.w == 8.0f);
   }
 
-  SECTION("transform vector") {
+  SECTION("transform vec4") {
     Mat4f m1 = { {1,2,3,4}, {5,6,7,8}, {9,10,11,12}, {13,14,15,16} };
     Vec4f v1 = { 1.0f, 2.0f, 3.0f, 4.0f };
     Vec4f v2 = test_mul3(m1, v1);
@@ -68,6 +74,26 @@ TEST_CASE("mat4<float>", "[mat4f]") {
     REQUIRE(v2.y == 100.0f);
     REQUIRE(v2.z == 110.0f);
     REQUIRE(v2.w == 120.0f);
+  }
+
+  SECTION("transform vec3") {
+    Mat4f m1 = { {1,2,3,4}, {5,6,7,8}, {9,10,11,12}, {13,14,15,16} };
+    Vec3f v1 = { 1.0f, 2.0f, 3.0f };
+    Vec4f v2 = test_mul5(m1, v1);
+    REQUIRE(v2.x == 38.0f);
+    REQUIRE(v2.y == 44.0f);
+    REQUIRE(v2.z == 50.0f);
+    REQUIRE(v2.w == 56.0f);
+  }
+
+  SECTION("transform pos3") {
+    Mat4f m1 = { {1,2,3,4}, {5,6,7,8}, {9,10,11,12}, {13,14,15,16} };
+    Pos3f v1 = { 10.0f, 20.0f, 30.0f };
+    Vec4f v2 = test_mul6(m1, v1);
+    REQUIRE(v2.x == 393.0f);
+    REQUIRE(v2.y == 454.0f);
+    REQUIRE(v2.z == 515.0f);
+    REQUIRE(v2.w == 576.0f);
   }
 
   SECTION("matrix multiplication") {
@@ -152,6 +178,16 @@ static Vec4f test_mul3(PMat4f a, PVec4f b)
 }
 
 static Mat4f test_mul4(PMat4f a, PMat4f b)
+{
+  return a * b;
+}
+
+static Vec4f test_mul5(PMat4f a, PVec3f b)
+{
+  return a * b;
+}
+
+static Vec4f test_mul6(PMat4f a, PPos3f b)
 {
   return a * b;
 }
