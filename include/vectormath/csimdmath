@@ -1,0 +1,47 @@
+// -*- C++ -*-
+#pragma once
+
+#include "simdmath/fabsf4.h"
+#include "simdmath/fmaxf4.h"
+#include "simdmath/fminf4.h"
+#include "simdmath/recipf4.h"
+#include "simdmath/rsqrtf4.h"
+#include "simdmath/sqrtf4.h"
+
+namespace simdmath {
+
+#if defined(__clang__)
+  typedef float vec_float4 __attribute__((ext_vector_type(4)));
+#endif
+
+inline vec_float4 fabs(vec_float4 x)
+{
+  return _fabsf4(x);
+}
+
+inline vec_float4 fmax(vec_float4 x, vec_float4 y)
+{
+  return _fmaxf4(x, y);
+}
+
+inline vec_float4 fmin(vec_float4 x, vec_float4 y)
+{
+  return _fminf4(x, y);
+}
+
+inline vec_float4 recip(vec_float4 x)
+{
+  return _recipf4(x);
+}
+
+inline vec_float4 rsqrt(vec_float4 x)
+{
+  return _rsqrtf4(x);
+}
+
+inline vec_float4 sqrt(vec_float4 x)
+{
+  return _sqrtf4(x);
+}
+
+}

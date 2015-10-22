@@ -28,6 +28,9 @@ THE SOFTWARE.
 #include <cstdint>
 #include <cmath>
 #include <cfloat>
+#ifdef __SSE__
+#  include <xmmintrin.h>
+#endif
 
 namespace vectormath {
 
@@ -212,6 +215,13 @@ template<typename T> inline Vec3<T> transform(const Quat<T>& q, const Vec3<T>& v
 
 // Float utility functions
 
+using std::fabs;
+using std::fmax;
+using std::fmin;
+using std::sqrt;
+using std::sin;
+using std::cos;
+
 inline float recip(float x)
 {
   return 1.0f / x;
@@ -224,12 +234,17 @@ inline double recip(double x)
 
 inline float rsqrt(float x)
 {
-  return recip(std::sqrt(x));
+#ifdef __SSE__
+  float approx = _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x)));
+  return 0.5f * approx * (3.0f - x * approx * approx);
+#else
+  return recip(sqrt(x));
+#endif
 }
 
 inline double rsqrt(double x)
 {
-  return recip(std::sqrt(x));
+  return recip(sqrt(x));
 }
 
 // Vector Operations
@@ -354,7 +369,6 @@ inline Vec3<T> cross(const Vec3<T>& a, const Vec3<T>& b)
 template<typename T>
 inline Vec3<T> min(const Vec3<T>& a, const Vec3<T>& b)
 {
-  using std::fmin;
   T x = fmin(a.x, b.x);
   T y = fmin(a.y, b.y);
   T z = fmin(a.z, b.z);
@@ -364,7 +378,6 @@ inline Vec3<T> min(const Vec3<T>& a, const Vec3<T>& b)
 template<typename T>
 inline Pos3<T> min(const Pos3<T>& a, const Pos3<T>& b)
 {
-  using std::fmin;
   T x = fmin(a.x, b.x);
   T y = fmin(a.y, b.y);
   T z = fmin(a.z, b.z);
@@ -374,7 +387,6 @@ inline Pos3<T> min(const Pos3<T>& a, const Pos3<T>& b)
 template<typename T>
 inline Vec3<T> max(const Vec3<T>& a, const Vec3<T>& b)
 {
-  using std::fmax;
   T x = fmax(a.x, b.x);
   T y = fmax(a.y, b.y);
   T z = fmax(a.z, b.z);
@@ -384,7 +396,6 @@ inline Vec3<T> max(const Vec3<T>& a, const Vec3<T>& b)
 template<typename T>
 inline Pos3<T> max(const Pos3<T>& a, const Pos3<T>& b)
 {
-  using std::fmax;
   T x = fmax(a.x, b.x);
   T y = fmax(a.y, b.y);
   T z = fmax(a.z, b.z);
@@ -394,21 +405,18 @@ inline Pos3<T> max(const Pos3<T>& a, const Pos3<T>& b)
 template<typename T>
 inline Vec3<T> abs(const Vec3<T>& a)
 {
-  using std::fabs;
   return Vec3<T>{ fabs(a.x), fabs(a.y), fabs(a.z) };
 }
 
 template<typename T>
 inline Pos3<T> abs(const Pos3<T>& a)
 {
-  using std::fabs;
   return Pos3<T>{ fabs(a.x), fabs(a.y), fabs(a.z) };
 }
 
 template<typename T>
 inline T length(const Vec3<T>& a)
 {
-  using std::sqrt;
   T s = a.x * a.x + a.y * a.y + a.z * a.z;
   return sqrt(s);
 }
@@ -416,7 +424,6 @@ inline T length(const Vec3<T>& a)
 template<typename T>
 inline Vec3<T> normalize(const Vec3<T>& a)
 {
-  using std::sqrt;
   T s = a.x * a.x + a.y * a.y + a.z * a.z;
   s = rsqrt(s);
   return Vec3<T>{ (a.x * s), (a.y * s), (a.z * s) };
@@ -710,8 +717,6 @@ inline Tfm3<T> Tfm3<T>::identity()
 template<typename T>
 inline Mat3<T> Mat3<T>::rotation(const T& angle, const Vec3<T>& axis)
 {
-  using std::sin;
-  using std::cos;
   T s = sin(angle);
   T c = cos(angle);
   T x = axis.x, y = axis.y, z = axis.z;
@@ -794,7 +799,6 @@ inline T dot(const Quat<T>& a, const Quat<T>& b)
 template<typename T>
 inline Quat<T> normalize(const Quat<T>& a)
 {
-  using std::sqrt;
   T s = a.w * a.w + a.x * a.x + a.y * a.y + a.z * a.z;
   s = rsqrt(s);
   return Quat<T>{ (a.w * s), (a.x * s), (a.y * s), (a.z * s) };
@@ -829,8 +833,6 @@ inline Quat<T> Quat<T>::identity()
 template<typename T>
 inline Quat<T> Quat<T>::rotation(const T& angle, const Vec3<T>& axis)
 {
-  using std::sin;
-  using std::cos;
   T ha = angle / T(2);
   T s = sin(ha), c = cos(ha);
   return Quat<T>{ c, (axis.x * s), (axis.y * s), (axis.z * s) };
@@ -839,7 +841,6 @@ inline Quat<T> Quat<T>::rotation(const T& angle, const Vec3<T>& axis)
 template<typename T>
 inline Quat<T> Quat<T>::rotation(const Vec3<T>& v0, const Vec3<T>& v1)
 {
-  using std::sqrt;
   Vec3<T> sa = cross(v0, v1); // axis * sin(angle)
   T ca = dot(v0, v1); // cos(angle)
   // compute cos(angle/2) = sqrt((1+cos)/2)
