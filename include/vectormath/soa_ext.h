@@ -1,3 +1,4 @@
+// -*- C++ -*-
 /*
 The source file is part of vectormath
 

@@ -8,6 +8,7 @@ using PVec3f4 = const vectormath::Vec3<vectormath::simdf4>&;
 
 TEST_CASE("vec3<simdf4>", "[vec3f4]") {
   REQUIRE(std::is_pod<Vec3f4>::value);
+  REQUIRE((std::is_same<float, vectormath::simdf4>::value) == false);
 
   SECTION("load") {
     float data[12] = {
