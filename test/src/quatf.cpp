@@ -112,7 +112,7 @@ TEST_CASE("quat<float>", "[quatf]") {
     REQUIRE(v2.z == Approx(3.0f));
   }
 
-  SECTION("convert to 3x3 matrix") {
+  SECTION("convert to/from 3x3 matrix") {
     float pi = 3.141592653589793f;
     Quatf q = Quatf::rotation(pi / 3.0f, Vec3f{0.0f, 0.0f, 1.0f});
     Mat3f m = Mat3f::rotation(q);
@@ -125,8 +125,12 @@ TEST_CASE("quat<float>", "[quatf]") {
     REQUIRE(m.c2.x == Approx(0.0f));
     REQUIRE(m.c2.y == Approx(0.0f));
     REQUIRE(m.c2.z == Approx(1.0f));
+    Quatf q2 = Quatf::rotation(m);
+    REQUIRE(q2.w == Approx(q.w));
+    REQUIRE(q2.x == Approx(q.x));
+    REQUIRE(q2.y == Approx(q.y));
+    REQUIRE(q2.z == Approx(q.z));
   }
-
 }
 
 static Quatf test_neg(PQuatf a)

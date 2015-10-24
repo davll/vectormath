@@ -39,6 +39,7 @@ template<typename T> struct Pos3;
 template<typename T> struct Vec4;
 template<typename T> struct Mat3;
 template<typename T> struct Mat4;
+template<typename T> struct Tfm3;
 template<typename T> struct Quat;
 
 // 3-component vector
@@ -50,7 +51,7 @@ struct Vec3 {
 
   inline Vec3() = default;
   inline Vec3(const Vec3&) = default;
-  inline Vec3(const T& tx, const T& ty, const T& tz);
+  constexpr inline Vec3(const T& tx, const T& ty, const T& tz);
   explicit inline Vec3(const Vec4<T>& v);
   explicit inline Vec3(const Pos3<T>& p);
 };
@@ -66,6 +67,7 @@ template<typename T> inline Vec3<T> min(const Vec3<T>& a, const Vec3<T>& b);
 template<typename T> inline Vec3<T> max(const Vec3<T>& a, const Vec3<T>& b);
 template<typename T> inline Vec3<T> abs(const Vec3<T>& a);
 template<typename T> inline T length(const Vec3<T>& a);
+template<typename T> inline T length_squared(const Vec3<T>& a);
 template<typename T> inline Vec3<T> normalize(const Vec3<T>& a);
 
 // 3-D position vector
@@ -77,7 +79,7 @@ struct Pos3 {
 
   inline Pos3() = default;
   inline Pos3(const Pos3&) = default;
-  inline Pos3(const T& tx, const T& ty, const T& tz);
+  constexpr inline Pos3(const T& tx, const T& ty, const T& tz);
   explicit inline Pos3(const Vec3<T>& v);
   explicit inline Pos3(const Vec4<T>& v);
 };
@@ -102,7 +104,7 @@ struct Vec4 {
 
   inline Vec4() = default;
   inline Vec4(const Vec4&) = default;
-  inline Vec4(const T& tx, const T& ty, const T& tz, const T& tw);
+  constexpr inline Vec4(const T& tx, const T& ty, const T& tz, const T& tw);
   explicit inline Vec4(const Vec3<T>& v, const T& tw = T(0));
   explicit inline Vec4(const Pos3<T>& p);
 };
@@ -123,9 +125,10 @@ struct Mat3 {
 
   inline Mat3() = default;
   inline Mat3(const Mat3&) = default;
-  inline Mat3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c);
+  constexpr inline Mat3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c);
+  explicit inline Mat3(const Tfm3<T>& tfm);
 
-  static inline Mat3 identity();
+  constexpr static inline Mat3 identity();
   static inline Mat3 rotation(const T& angle, const Vec3<T>& axis);
   static inline Mat3 rotation(const Quat<T>& unitquat);
   static inline Mat3 scale(const Vec3<T>& scalevec);
@@ -148,10 +151,11 @@ struct Mat4 {
 
   inline Mat4() = default;
   inline Mat4(const Mat4&) = default;
-  inline Mat4(const Vec4<T>& a, const Vec4<T>& b, const Vec4<T>& c, const Vec4<T>& d);
+  constexpr inline Mat4(const Vec4<T>& a, const Vec4<T>& b, const Vec4<T>& c, const Vec4<T>& d);
   explicit inline Mat4(const Mat3<T>& m, const Vec4<T>& v);
+  explicit inline Mat4(const Tfm3<T>& m);
 
-  static inline Mat4 identity();
+  constexpr static inline Mat4 identity();
 };
 
 template<typename T> inline Mat4<T> operator+(const Mat4<T>& a, const Mat4<T>& b);
@@ -174,10 +178,11 @@ struct Tfm3 {
 
   inline Tfm3() = default;
   inline Tfm3(const Tfm3&) = default;
-  inline Tfm3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c, const Vec3<T>& d);
+  constexpr inline Tfm3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c, const Vec3<T>& d);
   explicit inline Tfm3(const Mat3<T>& m, const Vec3<T>& v);
 
-  static inline Tfm3 identity();
+  constexpr static inline Tfm3 identity();
+  static inline Tfm3 target_at(const Pos3<T>& eye, const Pos3<T>& center, const Vec3<T>& up);
 };
 
 template<typename T> inline Vec3<T> operator*(const Tfm3<T>& m, const Vec3<T>& v);
@@ -195,11 +200,12 @@ struct Quat {
 
   inline Quat() = default;
   inline Quat(const Quat&) = default;
-  inline Quat(const T& tw, const T& tx, const T& ty, const T& tz);
+  constexpr inline Quat(const T& tw, const T& tx, const T& ty, const T& tz);
 
-  static inline Quat identity();
+  constexpr static inline Quat identity();
   static inline Quat rotation(const T& angle, const Vec3<T>& axis);
   static inline Quat rotation(const Vec3<T>& v0, const Vec3<T>& v1);
+  static inline Quat rotation(const Mat3<T>& mat);
 };
 
 template<typename T> inline Quat<T> operator-(const Quat<T>& a);
@@ -417,32 +423,36 @@ inline Pos3<T> abs(const Pos3<T>& a)
 template<typename T>
 inline T length(const Vec3<T>& a)
 {
-  T s = a.x * a.x + a.y * a.y + a.z * a.z;
-  return sqrt(s);
+  return sqrt(length_squared(a));
+}
+
+template<typename T>
+inline T length_squared(const Vec3<T>& a)
+{
+  return a.x * a.x + a.y * a.y + a.z * a.z;
 }
 
 template<typename T>
 inline Vec3<T> normalize(const Vec3<T>& a)
 {
-  T s = a.x * a.x + a.y * a.y + a.z * a.z;
-  s = rsqrt(s);
+  T s = rsqrt(length_squared(a));
   return Vec3<T>{ (a.x * s), (a.y * s), (a.z * s) };
 }
 
 template<typename T>
-inline Vec3<T>::Vec3(const T& tx, const T& ty, const T& tz)
+constexpr inline Vec3<T>::Vec3(const T& tx, const T& ty, const T& tz)
 : x(tx), y(ty), z(tz)
 {
 }
 
 template<typename T>
-inline Pos3<T>::Pos3(const T& tx, const T& ty, const T& tz)
+constexpr inline Pos3<T>::Pos3(const T& tx, const T& ty, const T& tz)
 : x(tx), y(ty), z(tz)
 {
 }
 
 template<typename T>
-inline Vec4<T>::Vec4(const T& tx, const T& ty, const T& tz, const T& tw)
+constexpr inline Vec4<T>::Vec4(const T& tx, const T& ty, const T& tz, const T& tw)
 : x(tx), y(ty), z(tz), w(tw)
 {
 }
@@ -653,20 +663,26 @@ inline Mat3<T> upper3x3(const Mat4<T>& m)
 }
 
 template<typename T>
-inline Mat3<T>::Mat3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
+constexpr inline Mat3<T>::Mat3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
 : c0(a), c1(b), c2(c)
 {
 }
 
 template<typename T>
-inline Mat4<T>::Mat4(const Vec4<T>& a, const Vec4<T>& b, const Vec4<T>& c, const Vec4<T>& d)
+constexpr inline Mat4<T>::Mat4(const Vec4<T>& a, const Vec4<T>& b, const Vec4<T>& c, const Vec4<T>& d)
 : c0(a), c1(b), c2(c), c3(d)
 {
 }
 
 template<typename T>
-inline Tfm3<T>::Tfm3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c, const Vec3<T>& d)
+constexpr inline Tfm3<T>::Tfm3(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c, const Vec3<T>& d)
 : c0(a), c1(b), c2(c), c3(d)
+{
+}
+
+template<typename T>
+inline Mat3<T>::Mat3(const Tfm3<T>& tfm)
+: c0(tfm.c0), c1(tfm.c1), c2(tfm.c2)
 {
 }
 
@@ -677,13 +693,19 @@ inline Mat4<T>::Mat4(const Mat3<T>& m, const Vec4<T>& v)
 }
 
 template<typename T>
+inline Mat4<T>::Mat4(const Tfm3<T>& m)
+: c0(m.c0, T(0)), c1(m.c1, T(0)), c2(m.c2, T(0)), c3(m.c3, T(1))
+{
+}
+
+template<typename T>
 inline Tfm3<T>::Tfm3(const Mat3<T>& m, const Vec3<T>& v)
 : c0(m.c0), c1(m.c1), c2(m.c2), c3(v)
 {
 }
 
 template<typename T>
-inline Mat3<T> Mat3<T>::identity()
+constexpr inline Mat3<T> Mat3<T>::identity()
 {
   return Mat3<T>{
     Vec3<T>{ T(1), T(0), T(0) },
@@ -693,7 +715,7 @@ inline Mat3<T> Mat3<T>::identity()
 }
 
 template<typename T>
-inline Mat4<T> Mat4<T>::identity()
+constexpr inline Mat4<T> Mat4<T>::identity()
 {
   return Mat4<T>{
     Vec4<T>{ T(1), T(0), T(0), T(0) },
@@ -704,7 +726,7 @@ inline Mat4<T> Mat4<T>::identity()
 }
 
 template<typename T>
-inline Tfm3<T> Tfm3<T>::identity()
+constexpr inline Tfm3<T> Tfm3<T>::identity()
 {
   return Tfm3<T>{
     Vec3<T>{ T(1), T(0), T(0) },
@@ -737,6 +759,16 @@ inline Mat3<T> Mat3<T>::scale(const Vec3<T>& scalevec)
     Vec3<T>{ T(0), scalevec.y, T(0) },
     Vec3<T>{ T(0), T(0), scalevec.z }
   };
+}
+
+template<typename T>
+inline Tfm3<T> Tfm3<T>::target_at(const Pos3<T>& eye, const Pos3<T>& center, const Vec3<T>& up)
+{
+  Vec3<T> forward = normalize(center - eye);
+  Vec3<T> right = normalize(cross(forward, up));
+  Vec3<T> updir = cross(right, forward);
+  Mat3<T> rot = Mat3<T>{ right, updir, -forward };
+  return Tfm3<T>{ rot, Vec3<T>(eye) };
 }
 
 // Quaternion Operations
@@ -825,7 +857,7 @@ inline Vec3<T> transform(const Quat<T>& q, const Vec3<T>& v)
 }
 
 template<typename T>
-inline Quat<T> Quat<T>::identity()
+constexpr inline Quat<T> Quat<T>::identity()
 {
   return Quat<T>{T(1), T(0), T(0), T(0)};
 }
@@ -833,7 +865,7 @@ inline Quat<T> Quat<T>::identity()
 template<typename T>
 inline Quat<T> Quat<T>::rotation(const T& angle, const Vec3<T>& axis)
 {
-  T ha = angle / T(2);
+  T ha = angle * T(0.5);
   T s = sin(ha), c = cos(ha);
   return Quat<T>{ c, (axis.x * s), (axis.y * s), (axis.z * s) };
 }
@@ -848,7 +880,7 @@ inline Quat<T> Quat<T>::rotation(const Vec3<T>& v0, const Vec3<T>& v1)
   //      => sin(angle/2) / sin(angle) = 1/sqrt(2+2cos)
   T tmp0 = T(2) + ca + ca; // 2 + 2cos
   T tmp1 = T(1) / sqrt(tmp0); // sin(angle/2) / sin(angle)
-  T tmp2 = tmp0 * tmp1 / T(2); // cos(angle/2)
+  T tmp2 = tmp0 * tmp1 * T(0.5); // cos(angle/2)
   return Quat<T>{ tmp2, (sa.x * tmp1), (sa.y * tmp1), (sa.z * tmp1) };
 }
 
@@ -869,7 +901,42 @@ inline Mat3<T> Mat3<T>::rotation(const Quat<T>& q)
 }
 
 template<typename T>
-inline Quat<T>::Quat(const T& tw, const T& tx, const T& ty, const T& tz)
+inline Quat<T> Quat<T>::rotation(const Mat3<T>& mat)
+{
+  T xx = mat.c0.x, yx = mat.c0.y, zx = mat.c0.z;
+  T xy = mat.c1.x, yy = mat.c1.y, zy = mat.c1.z;
+  T xz = mat.c2.x, yz = mat.c2.y, zz = mat.c2.z;
+  T tr = xx + yy + zz;
+  bool negtr = tr < T(0);
+  bool zgtx = zz > xx, zgty = zz > yy, ygtx = yy > xx;
+  bool largestxy = (!zgtx || !zgty) && negtr;
+  bool largestyz = (ygtx || zgtx) && negtr;
+  bool largestzx = (zgty || !ygtx) && negtr;
+  if (largestxy)
+    zz = -zz, xy = -xy;
+  if (largestyz)
+    xx = -xx, yz = -yz;
+  if (largestzx)
+    yy = -yy, zx = -zx;
+  T radicand = xx + yy + zz + T(1);
+  T scale = rsqrt(radicand) * T(0.5);
+  T tmpx = (zy - yz) * scale;
+  T tmpy = (xz - zx) * scale;
+  T tmpz = (yx - xy) * scale;
+  T tmpw = radicand * scale;
+  T qx = tmpx, qy = tmpy, qz = tmpz, qw = tmpw;
+  if (largestxy)
+    qx = tmpw, qy = tmpz, qz = tmpy, qw = tmpx;
+  if (largestyz) {
+    tmpx = qx, tmpz = qz;
+    qx = qy, qz = qw;
+    qy = tmpx, qw = tmpz;
+  }
+  return Quat<T>{ qw, qx, qy, qz };
+}
+
+template<typename T>
+constexpr inline Quat<T>::Quat(const T& tw, const T& tx, const T& ty, const T& tz)
 : w(tw), x(tx), y(ty), z(tz)
 {
 }

@@ -16,6 +16,7 @@ static Vec3f test_min(PVec3f a, PVec3f b) __attribute__((noinline));
 static Vec3f test_max(PVec3f a, PVec3f b) __attribute__((noinline));
 static Vec3f test_abs(PVec3f a) __attribute__((noinline));
 static float test_len(PVec3f a) __attribute__((noinline));
+static float test_lensqr(PVec3f a) __attribute__((noinline));
 static Vec3f test_normalize(PVec3f a) __attribute__((noinline));
 
 TEST_CASE("vec3<float>", "[vec3f]") {
@@ -102,6 +103,11 @@ TEST_CASE("vec3<float>", "[vec3f]") {
     REQUIRE(test_len(a) == Approx(3.0f));
   }
 
+  SECTION("length squared") {
+    Vec3f a = { 2.0f, 1.0f, -2.0f };
+    REQUIRE(test_lensqr(a) == Approx(9.0f));
+  }
+
   SECTION("normalize") {
     Vec3f a = { 2.0f, -1.0f, 2.0f };
     Vec3f b = test_normalize(a);
@@ -165,6 +171,11 @@ static Vec3f test_abs(PVec3f a)
 static float test_len(PVec3f a)
 {
   return length(a);
+}
+
+static float test_lensqr(PVec3f a)
+{
+  return length_squared(a);
 }
 
 static Vec3f test_normalize(PVec3f a)
