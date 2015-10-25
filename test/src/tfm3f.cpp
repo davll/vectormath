@@ -6,6 +6,7 @@ using Vec3f = vectormath::Vec3<float>;
 using PVec3f = const vectormath::Vec3<float>&;
 using Pos3f = vectormath::Pos3<float>;
 using PPos3f = const vectormath::Pos3<float>&;
+using Mat3f = vectormath::Mat3<float>;
 using Tfm3f = vectormath::Tfm3<float>;
 using PTfm3f = const vectormath::Tfm3<float>&;
 
@@ -68,6 +69,26 @@ TEST_CASE("tfm3<float>", "[tfm3f]") {
     REQUIRE(b.c3.x == Approx(-0.94545f));
     REQUIRE(b.c3.y == Approx(-0.05455f));
     REQUIRE(b.c3.z == Approx(-0.98182f));
+  }
+
+  SECTION("make camera transformation") {
+    Pos3f eye = { -1.0f, 0.0f, 1.0f };
+    Mat3f rot = Mat3f::rotation(0.5235988f, Vec3f{ 0.0f, 1.0f, 0.0f });
+    Pos3f target = eye + rot * Vec3f{0,0,-1} * 5.0f;
+    Vec3f up = { 0.0f, 1.0f, 0.0f };
+    Tfm3f m = Tfm3f::make_camera(eye, target, up);
+    REQUIRE(m.c0.x == Approx(rot.c0.x));
+    REQUIRE(m.c0.y == Approx(rot.c0.y));
+    REQUIRE(m.c0.z == Approx(rot.c0.z));
+    REQUIRE(m.c1.x == Approx(rot.c1.x));
+    REQUIRE(m.c1.y == Approx(rot.c1.y));
+    REQUIRE(m.c1.z == Approx(rot.c1.z));
+    REQUIRE(m.c2.x == Approx(rot.c2.x));
+    REQUIRE(m.c2.y == Approx(rot.c2.y));
+    REQUIRE(m.c2.z == Approx(rot.c2.z));
+    REQUIRE(m.c3.x == eye.x);
+    REQUIRE(m.c3.y == eye.y);
+    REQUIRE(m.c3.z == eye.z);
   }
 }
 

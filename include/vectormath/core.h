@@ -182,7 +182,7 @@ struct Tfm3 {
   explicit inline Tfm3(const Mat3<T>& m, const Vec3<T>& v);
 
   constexpr static inline Tfm3 identity();
-  static inline Tfm3 target_at(const Pos3<T>& eye, const Pos3<T>& center, const Vec3<T>& up);
+  static inline Tfm3 make_camera(const Pos3<T>& eye, const Pos3<T>& center, const Vec3<T>& up);
 };
 
 template<typename T> inline Vec3<T> operator*(const Tfm3<T>& m, const Vec3<T>& v);
@@ -762,7 +762,7 @@ inline Mat3<T> Mat3<T>::scale(const Vec3<T>& scalevec)
 }
 
 template<typename T>
-inline Tfm3<T> Tfm3<T>::target_at(const Pos3<T>& eye, const Pos3<T>& center, const Vec3<T>& up)
+inline Tfm3<T> Tfm3<T>::make_camera(const Pos3<T>& eye, const Pos3<T>& center, const Vec3<T>& up)
 {
   Vec3<T> forward = normalize(center - eye);
   Vec3<T> right = normalize(cross(forward, up));
