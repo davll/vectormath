@@ -1,14 +1,8 @@
 #include <vectormath/core.h>
 #include <vectormath/geometry.h>
 #include "catch.hpp"
+#include "common.h"
 
-using Vec3f = vectormath::Vec3<float>;
-using Vec4f = vectormath::Vec4<float>;
-using Pos3f = vectormath::Pos3<float>;
-using Quatf = vectormath::Quat<float>;
-using Mat3f = vectormath::Mat3<float>;
-using Tfm3f = vectormath::Tfm3<float>;
-using Mat4f = vectormath::Mat4<float>;
 using Planef = vectormath::Plane<float>;
 using BBoxf = vectormath::BoundingBox<float>;
 using Spheref = vectormath::Sphere<float>;

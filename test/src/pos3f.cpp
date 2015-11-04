@@ -1,22 +1,17 @@
 #include <vectormath/core.h>
 #include <type_traits>
 #include "catch.hpp"
+#include "common.h"
 
-using Vec3f = vectormath::Vec3<float>;
-using Vec4f = vectormath::Vec4<float>;
-using Pos3f = vectormath::Pos3<float>;
-using PVec3f = const vectormath::Vec3<float>&;
-using PPos3f = const vectormath::Pos3<float>&;
-
-static Pos3f test_neg(PPos3f a) __attribute__((noinline));
-static Pos3f test_add(PPos3f a, PVec3f b) __attribute__((noinline));
-static Pos3f test_sub1(PPos3f a, PVec3f b) __attribute__((noinline));
-static Vec3f test_sub2(PPos3f a, PPos3f b) __attribute__((noinline));
-static Pos3f test_mul1(PPos3f a, float s) __attribute__((noinline));
-static Pos3f test_mul2(float s, PPos3f a) __attribute__((noinline));
-static Pos3f test_min(PPos3f a, PPos3f b) __attribute__((noinline));
-static Pos3f test_max(PPos3f a, PPos3f b) __attribute__((noinline));
-static Pos3f test_abs(PPos3f a) __attribute__((noinline));
+static NOINLINE Pos3f test_neg(PPos3f a);
+static NOINLINE Pos3f test_add(PPos3f a, PVec3f b);
+static NOINLINE Pos3f test_sub1(PPos3f a, PVec3f b);
+static NOINLINE Vec3f test_sub2(PPos3f a, PPos3f b);
+static NOINLINE Pos3f test_mul1(PPos3f a, float s);
+static NOINLINE Pos3f test_mul2(float s, PPos3f a);
+static NOINLINE Pos3f test_min(PPos3f a, PPos3f b);
+static NOINLINE Pos3f test_max(PPos3f a, PPos3f b);
+static NOINLINE Pos3f test_abs(PPos3f a);
 
 TEST_CASE("pos3<float>", "[pos3f]") {
   REQUIRE(std::is_pod<Pos3f>::value);

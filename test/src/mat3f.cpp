@@ -1,18 +1,14 @@
 #include <vectormath/core.h>
 #include <type_traits>
 #include "catch.hpp"
+#include "common.h"
 
-using Vec3f = vectormath::Vec3<float>;
-using PVec3f = const vectormath::Vec3<float>&;
-using Mat3f = vectormath::Mat3<float>;
-using PMat3f = const vectormath::Mat3<float>&;
-
-static Mat3f test_add(PMat3f a, PMat3f b) __attribute__((noinline));
-static Mat3f test_mul1(PMat3f a, float s) __attribute__((noinline));
-static Vec3f test_mul3(PMat3f a, PVec3f b) __attribute__((noinline));
-static Mat3f test_mul4(PMat3f a, PMat3f b) __attribute__((noinline));
-static Mat3f test_transpose(PMat3f a) __attribute__((noinline));
-static Mat3f test_inv(PMat3f a) __attribute__((noinline));
+static NOINLINE Mat3f test_add(PMat3f a, PMat3f b);
+static NOINLINE Mat3f test_mul1(PMat3f a, float s);
+static NOINLINE Vec3f test_mul3(PMat3f a, PVec3f b);
+static NOINLINE Mat3f test_mul4(PMat3f a, PMat3f b);
+static NOINLINE Mat3f test_transpose(PMat3f a);
+static NOINLINE Mat3f test_inv(PMat3f a);
 
 TEST_CASE("mat3<float>", "[mat3f]") {
   REQUIRE(std::is_pod<Mat3f>::value);

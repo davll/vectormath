@@ -1,24 +1,16 @@
 #include <vectormath/core.h>
 #include <type_traits>
 #include "catch.hpp"
+#include "common.h"
 
-using Vec3f = vectormath::Vec3<float>;
-using PVec3f = const vectormath::Vec3<float>&;
-using Pos3f = vectormath::Pos3<float>;
-using PPos3f = const vectormath::Pos3<float>&;
-using Vec4f = vectormath::Vec4<float>;
-using PVec4f = const vectormath::Vec4<float>&;
-using Mat4f = vectormath::Mat4<float>;
-using PMat4f = const vectormath::Mat4<float>&;
-
-static Mat4f test_add(PMat4f a, PMat4f b) __attribute__((noinline));
-static Mat4f test_mul1(PMat4f a, float s) __attribute__((noinline));
-static Vec4f test_mul3(PMat4f a, PVec4f b) __attribute__((noinline));
-static Mat4f test_mul4(PMat4f a, PMat4f b) __attribute__((noinline));
-static Vec4f test_mul5(PMat4f a, PVec3f b) __attribute__((noinline));
-static Vec4f test_mul6(PMat4f a, PPos3f b) __attribute__((noinline));
-static Mat4f test_transpose(PMat4f a) __attribute__((noinline));
-static Mat4f test_inv(PMat4f a) __attribute__((noinline));
+static NOINLINE Mat4f test_add(PMat4f a, PMat4f b);
+static NOINLINE Mat4f test_mul1(PMat4f a, float s);
+static NOINLINE Vec4f test_mul3(PMat4f a, PVec4f b);
+static NOINLINE Mat4f test_mul4(PMat4f a, PMat4f b);
+static NOINLINE Vec4f test_mul5(PMat4f a, PVec3f b);
+static NOINLINE Vec4f test_mul6(PMat4f a, PPos3f b);
+static NOINLINE Mat4f test_transpose(PMat4f a);
+static NOINLINE Mat4f test_inv(PMat4f a);
 
 TEST_CASE("mat4<float>", "[mat4f]") {
   REQUIRE(std::is_pod<Mat4f>::value);

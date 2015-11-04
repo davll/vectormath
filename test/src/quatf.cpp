@@ -1,24 +1,19 @@
 #include <vectormath/core.h>
 #include <type_traits>
 #include "catch.hpp"
+#include "common.h"
 
-using Vec3f = vectormath::Vec3<float>;
-using PVec3f = const vectormath::Vec3<float>&;
-using Quatf = vectormath::Quat<float>;
-using PQuatf = const vectormath::Quat<float>&;
-using Mat3f = vectormath::Mat3<float>;
-
-static Quatf test_neg(PQuatf a) __attribute__((noinline));
-static Quatf test_conj(PQuatf a) __attribute__((noinline));
-static Quatf test_add(PQuatf a, PQuatf b) __attribute__((noinline));
-static Quatf test_sub(PQuatf a, PQuatf b) __attribute__((noinline));
-static Quatf test_mul1(PQuatf a, float s) __attribute__((noinline));
-static Quatf test_mul2(float s, PQuatf a) __attribute__((noinline));
-static Quatf test_mul3(PQuatf a, PQuatf b) __attribute__((noinline));
-static float test_dot(PQuatf a, PQuatf b) __attribute__((noinline));
-static Quatf test_normalize(PQuatf a) __attribute__((noinline));
-static Vec3f test_tfm(PQuatf q, PVec3f v) __attribute__((noinline));
-//static Mat3f test_cvtmat(PQuatf q) __attribute__((noinline));
+static NOINLINE Quatf test_neg(PQuatf a);
+static NOINLINE Quatf test_conj(PQuatf a);
+static NOINLINE Quatf test_add(PQuatf a, PQuatf b);
+static NOINLINE Quatf test_sub(PQuatf a, PQuatf b);
+static NOINLINE Quatf test_mul1(PQuatf a, float s);
+static NOINLINE Quatf test_mul2(float s, PQuatf a);
+static NOINLINE Quatf test_mul3(PQuatf a, PQuatf b);
+static NOINLINE float test_dot(PQuatf a, PQuatf b);
+static NOINLINE Quatf test_normalize(PQuatf a);
+static NOINLINE Vec3f test_tfm(PQuatf q, PVec3f v);
+//static Mat3f test_cvtmat(PQuatf q);
 
 TEST_CASE("quat<float>", "[quatf]") {
   REQUIRE(std::is_pod<Quatf>::value);

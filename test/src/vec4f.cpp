@@ -1,16 +1,14 @@
 #include <vectormath/core.h>
 #include <type_traits>
 #include "catch.hpp"
+#include "common.h"
 
-using Vec4f = vectormath::Vec4<float>;
-using PVec4f = const vectormath::Vec4<float>&;
-
-static Vec4f test_neg(PVec4f a) __attribute__((noinline));
-static Vec4f test_add(PVec4f a, PVec4f b) __attribute__((noinline));
-static Vec4f test_sub(PVec4f a, PVec4f b) __attribute__((noinline));
-static Vec4f test_mul1(PVec4f a, float s) __attribute__((noinline));
-static Vec4f test_mul2(float s, PVec4f a) __attribute__((noinline));
-static float test_dot(PVec4f a, PVec4f b) __attribute__((noinline));
+static NOINLINE Vec4f test_neg(PVec4f a);
+static NOINLINE Vec4f test_add(PVec4f a, PVec4f b);
+static NOINLINE Vec4f test_sub(PVec4f a, PVec4f b);
+static NOINLINE Vec4f test_mul1(PVec4f a, float s);
+static NOINLINE Vec4f test_mul2(float s, PVec4f a);
+static NOINLINE float test_dot(PVec4f a, PVec4f b);
 
 TEST_CASE("vec4<float>", "[vec4f]") {
   REQUIRE(std::is_pod<Vec4f>::value);

@@ -1,23 +1,21 @@
 #include <vectormath/core.h>
 #include <type_traits>
 #include "catch.hpp"
+#include "common.h"
 
-using Vec3f = vectormath::Vec3<float>;
-using PVec3f = const vectormath::Vec3<float>&;
-
-static Vec3f test_neg(PVec3f a) __attribute__((noinline));
-static Vec3f test_add(PVec3f a, PVec3f b) __attribute__((noinline));
-static Vec3f test_sub(PVec3f a, PVec3f b) __attribute__((noinline));
-static Vec3f test_mul1(PVec3f a, float s) __attribute__((noinline));
-static Vec3f test_mul2(float s, PVec3f a) __attribute__((noinline));
-static float test_dot(PVec3f a, PVec3f b) __attribute__((noinline));
-static Vec3f test_cross(PVec3f a, PVec3f b) __attribute__((noinline));
-static Vec3f test_min(PVec3f a, PVec3f b) __attribute__((noinline));
-static Vec3f test_max(PVec3f a, PVec3f b) __attribute__((noinline));
-static Vec3f test_abs(PVec3f a) __attribute__((noinline));
-static float test_len(PVec3f a) __attribute__((noinline));
-static float test_lensqr(PVec3f a) __attribute__((noinline));
-static Vec3f test_normalize(PVec3f a) __attribute__((noinline));
+static NOINLINE Vec3f test_neg(PVec3f a);
+static NOINLINE Vec3f test_add(PVec3f a, PVec3f b);
+static NOINLINE Vec3f test_sub(PVec3f a, PVec3f b);
+static NOINLINE Vec3f test_mul1(PVec3f a, float s);
+static NOINLINE Vec3f test_mul2(float s, PVec3f a);
+static NOINLINE float test_dot(PVec3f a, PVec3f b);
+static NOINLINE Vec3f test_cross(PVec3f a, PVec3f b);
+static NOINLINE Vec3f test_min(PVec3f a, PVec3f b);
+static NOINLINE Vec3f test_max(PVec3f a, PVec3f b);
+static NOINLINE Vec3f test_abs(PVec3f a);
+static NOINLINE float test_len(PVec3f a);
+static NOINLINE float test_lensqr(PVec3f a);
+static NOINLINE Vec3f test_normalize(PVec3f a);
 
 TEST_CASE("vec3<float>", "[vec3f]") {
   REQUIRE(std::is_pod<Vec3f>::value);
